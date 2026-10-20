@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* ---- Brand color tokens ---- */
+  --color-ink: #0B0B0C;         /* primary black */
+  --color-ink-soft: #1C1B1A;    /* charcoal surface */
+  --color-ivory: #F7F4EF;       /* primary light bg */
+  --color-paper: #FFFFFF;
+  --color-gold: #C6A15B;        /* primary accent */
+  --color-gold-deep: #A6823F;   /* hover/active gold */
+  --color-gold-mist: #EFE6D3;   /* faint gold tint for backgrounds */
+  --color-stone: #8C8880;       /* secondary text on light */
+  --color-stone-200: #E7E2D9;   /* borders on light */
+  --color-mist: #A39E96;        /* secondary text on dark */
+  --color-line-dark: #2E2C29;   /* borders on dark */
+  --color-sage: #6B8F71;
+  --color-rust: #B4543A;
+
+  /* ---- Type ---- */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Radius ---- */
+  --radius-gk-sm: 6px;
+  --radius-gk-md: 12px;
+  --radius-gk-lg: 20px;
+
+  /* ---- Shadow ---- */
+  --shadow-gk-soft: 0 4px 20px rgba(11,11,12,0.06);
+  --shadow-gk-lift: 0 16px 40px rgba(11,11,12,0.14);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Signature hairline gold divider used as the site's recurring motif */
+.gk-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+}
+
+/* Respect reduced motion preferences globally */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus ring, on-brand gold */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
