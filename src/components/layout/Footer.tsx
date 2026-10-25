@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12">
           <div className="flex flex-col gap-4 md:col-span-1">
             <span className="font-display text-2xl">
-              GK <span className="text-gold">DESIGN</span>
+              <span className="text-gold">GK DESIGN</span>
             </span>
             <p className="text-sm text-mist leading-relaxed">
               Furniture, designed with intention. Twelve years of building pieces

@@ -29,11 +29,11 @@ export default function Hero() {
             {content.eyebrow || "Est. 2014 — Bengaluru"}
           </span>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-ivory leading-[1.05]">
-            {content.headline || "Furniture, designed with intention."}
+            {content.headline || "Let us help you enhance your workflow with our precise design solutions."}
           </h1>
           <p className="text-base md:text-lg text-ivory/85 max-w-md">
             {content.subheadline ||
-              "Solid-wood pieces built to a spec, not a season — from a single reading chair to a full-home fit-out, with every measurement confirmed before it's made."}
+              "We are experts at delivering designs that are not only visually stunning but also production-ready."}
           </p>
           <div className="flex flex-wrap gap-4 pt-2">
             <Button variant="primary" as="a" href="/products" icon={<ArrowRight size={16} />}>
