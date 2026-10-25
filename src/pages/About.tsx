@@ -12,7 +12,7 @@ const whyChooseUs = [
   { icon: ArrowRightLeft, title: "Design to Execution", description: "From concept to technical precision." },
   { icon: Sparkles, title: "Photorealistic Quality", description: "Stunning renders that speak for your brand." },
   { icon: Clock, title: "Fast & Reliable", description: "Timely delivery with design consistency." },
-  { icon: Compass, title: "2025-Ready Approach", description: "Latest design tools & global design trends." },
+  { icon: Compass, title: "Ready Approach", description: "Latest design tools & global design trends." },
 ];
 
 export default function About() {
@@ -116,7 +116,7 @@ export default function About() {
           </div>
           <div className="flex flex-col gap-3 text-center md:text-left">
             <div>
-              <h2 className="font-display text-2xl text-ink">Founder</h2>
+              <h2 className="font-display text-2xl text-ink">Founder's Bio</h2>
             </div>
             <p className="text-sm text-stone leading-relaxed">
               In his career, G K Rajput has hands-on experience in executing a number of

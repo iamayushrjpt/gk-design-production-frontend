@@ -10,7 +10,6 @@ export default function Categories() {
         <span className="text-xs tracking-[0.2em] uppercase text-gold-deep">Browse</span>
         <h1 className="font-display text-3xl md:text-4xl text-ink">All Categories</h1>
         <p className="text-sm text-stone max-w-xl">
-          Six collections, one standard: real materials, honest dimensions, and finishes that age well.
         </p>
       </div>
 

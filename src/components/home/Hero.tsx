@@ -24,13 +24,12 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/30 to-transparent" />
 
       <div className="relative max-w-7xl mx-auto w-full px-5 sm:px-6 md:px-8 pb-12 sm:pb-16 md:pb-20">
-        <div className="max-w-xl flex flex-col gap-6">
+        <div className="max-w-3xl flex flex-col gap-6">
           <span className="text-xs tracking-[0.25em] uppercase text-gold">
-            {content.eyebrow || "Est. 2014 — Bengaluru"}
           </span>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl text-ivory leading-[1.05]">
+          <h2 className="font-display text-3xl sm:text-5xl md:text-6xl text-ivory leading-[1.05]">
             {content.headline || "Let us help you enhance your workflow with our precise design solutions."}
-          </h1>
+          </h2>
           <p className="text-base md:text-lg text-ivory/85 max-w-md">
             {content.subheadline ||
               "We are experts at delivering designs that are not only visually stunning but also production-ready."}
