@@ -23,7 +23,7 @@ const SECTION_COMPONENTS: Record<string, () => JSX.Element> = {
       sectionId="luxury_collection"
       eyebrow="Featured"
       title="The Luxury Collection"
-      description="Solid teak and walnut pieces, finished by hand, built to outlast a decade of daily use."
+      description=""
       luxury={true}
       viewAllHref="/products?tier=luxury"
     />
@@ -33,7 +33,7 @@ const SECTION_COMPONENTS: Record<string, () => JSX.Element> = {
       sectionId="affordable_collection"
       eyebrow="Featured"
       title="The Everyday Collection"
-      description="Considered design at a lower price point — same material transparency, smaller footprint."
+      description=""
       luxury={false}
       viewAllHref="/products?tier=affordable"
     />
@@ -52,13 +52,7 @@ const DEFAULT_ORDER = [
 ];
 
 export default function Home() {
-  const { sections, loading } = useHomepageSections();
-
-  if (loading) {
-    // Brief, content-free loading state rather than flashing sections in
-    // the wrong order and then re-flowing once the real config arrives.
-    return <div className="min-h-[60vh]" />;
-  }
+  const { sections } = useHomepageSections();
 
   const renderable = sections.filter((s) => s.isEnabled && SECTION_COMPONENTS[s.id]);
 

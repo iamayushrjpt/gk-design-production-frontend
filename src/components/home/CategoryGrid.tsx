@@ -24,7 +24,7 @@ export default function CategoryGrid() {
       <SectionHeading
         eyebrow={content.eyebrow || "Browse"}
         title={content.title || "Shop by category"}
-        description={content.description || "Six collections, one standard: real materials, honest dimensions, and finishes that age well."}
+        description={content.description || ""}
       />
 
       <div className="mt-10 flex gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-6 md:overflow-visible snap-x snap-mandatory">
@@ -38,6 +38,8 @@ export default function CategoryGrid() {
               src={cat.image}
               alt={cat.name}
               loading="lazy"
+              decoding="async"
+              sizes="(max-width: 768px) 160px, 16vw"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />

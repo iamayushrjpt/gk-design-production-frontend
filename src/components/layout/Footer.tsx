@@ -20,7 +20,7 @@ export default function Footer() {
             <div className="flex gap-4 pt-2">
               <a href={settings.socials?.instagram || "#"} aria-label="Instagram" className="text-mist hover:text-gold transition-colors"><Camera size={18} /></a>
               <a href={settings.socials?.facebook || "#"} aria-label="Facebook" className="text-mist hover:text-gold transition-colors"><Globe size={18} /></a>
-              <a href={getWhatsAppLink()} aria-label="WhatsApp" className="text-mist hover:text-gold transition-colors"><MessageCircle size={18} /></a>
+              <a href={getWhatsAppLink()} aria-label="WhatsApp" className="text-[#25D366] hover:text-[#128C7E] transition-colors"><MessageCircle size={18} /></a>
             </div>
           </div>
 

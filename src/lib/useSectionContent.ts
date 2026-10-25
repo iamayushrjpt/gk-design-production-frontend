@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { api, USE_LIVE_API } from "./api";
+import { USE_LIVE_API } from "./api";
+import { getPublicHomepageSections } from "./publicHomepageCache";
 
 /**
  * Returns the admin-edited content object for a homepage section, or an
@@ -23,8 +24,7 @@ export function useSectionContent(
   useEffect(() => {
     if (!USE_LIVE_API) return;
     setLoading(true);
-    api.homepageSections
-      .list()
+    getPublicHomepageSections()
       .then((sections) => {
         const match =
           "id" in selector

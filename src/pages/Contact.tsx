@@ -66,7 +66,7 @@ export default function Contact() {
             </div>
           </div>
 
-          <Button variant="primary" as="a" href={getWhatsAppLink()} icon={<MessageCircle size={16} />} className="w-fit">
+          <Button variant="primary" as="a" href={getWhatsAppLink()} icon={<MessageCircle size={16} />} className="w-fit !bg-[#25D366] !text-white hover:!bg-[#128C7E]">
             Chat on WhatsApp
           </Button>
 
@@ -116,7 +116,7 @@ export default function Contact() {
               className="px-3 py-2.5 border border-stone-200 rounded-gk-sm text-sm focus-visible:outline-gold"
             />
           </label>
-          <Button type="submit" variant="primary" icon={<MessageCircle size={16} />}>
+          <Button type="submit" variant="primary" icon={<MessageCircle size={16} />} className="!bg-[#25D366] !text-white hover:!bg-[#128C7E]">
             Send via WhatsApp
           </Button>
           {status === "sent" && (

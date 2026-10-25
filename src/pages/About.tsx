@@ -1,7 +1,4 @@
 import { Boxes, Layers, PenTool, MessagesSquare, Gem, ArrowRightLeft, Sparkles, Clock, Compass } from "lucide-react";
-import Button from "../components/ui/Button";
-import { MessageCircle } from "lucide-react";
-import { getWhatsAppLink } from "../lib/whatsapp";
 
 const offerings = [
   { icon: Boxes, text: "Custom 3D CAD models of luxury furniture and décor" },
@@ -21,22 +18,21 @@ const whyChooseUs = [
 export default function About() {
   return (
     <div>
-      {/* Hero */}
-      <div className="relative h-72 md:h-96 overflow-hidden">
+      {/* Hero image without text overlay */}
+      <div className="h-72 md:h-96 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=1600&q=80"
+          src="/about-gk.jpeg"
           alt="GK Design studio"
           className="w-full h-full object-cover"
+          loading="eager"
+          decoding="async"
         />
-        <div className="absolute inset-0 bg-ink/60" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
-            <span className="text-xs tracking-[0.2em] uppercase text-gold">Since 2016</span>
-            <h1 className="font-display text-3xl md:text-5xl text-ivory mt-2 max-w-2xl">
-              About GK Design
-            </h1>
-          </div>
-        </div>
+      </div>
+
+      {/* About heading follows the same centered layout as other sections */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-12 pb-4 text-center">
+        <span className="text-xs tracking-[0.2em] uppercase text-gold-deep">Since 2016</span>
+        <h1 className="font-display text-3xl md:text-4xl text-ink mt-2">About GK Design</h1>
       </div>
 
       {/* Intro */}
@@ -53,7 +49,7 @@ export default function About() {
       {/* Who We Are */}
       <div className="bg-ink-soft">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-16 flex flex-col gap-5">
-          <h2 className="font-display text-2xl text-ivory">Who We Are</h2>
+          <h2 className="font-display text-2xl text-ivory text-center">Who We Are</h2>
           <p className="text-sm text-mist leading-relaxed">
             We are a team of passionate designers and CAD professionals dedicated to redefining
             luxury furniture design through digital precision. At GK Design, we combine
@@ -111,17 +107,16 @@ export default function About() {
       {/* Founder */}
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-16">
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-          <div className="w-48 h-48 md:w-56 md:h-56 rounded-xl bg-[#111722] p-4 flex items-center justify-center shrink-0 border border-gold/20">
+          <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden bg-[#111722] p-4 flex items-center justify-center shrink-0 border border-gold/20">
             <img
               src="/gk-design-logo.jpeg"
               alt="GK Design logo"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-full"
             />
           </div>
           <div className="flex flex-col gap-3 text-center md:text-left">
             <div>
-              <h2 className="font-display text-2xl text-ink">GK Rajput</h2>
-              <p className="text-sm text-gold-deep">Founder & Owner</p>
+              <h2 className="font-display text-2xl text-ink">Founder</h2>
             </div>
             <p className="text-sm text-stone leading-relaxed">
               In his career, G K Rajput has hands-on experience in executing a number of
@@ -135,13 +130,6 @@ export default function About() {
         </div>
       </div>
 
-      {/* CTA */}
-      <div className="max-w-3xl mx-auto px-4 md:px-8 pb-16 text-center flex flex-col items-center gap-5">
-        <h2 className="font-display text-2xl text-ink">Want to talk through a project?</h2>
-        <Button variant="primary" as="a" href={getWhatsAppLink()} icon={<MessageCircle size={16} />}>
-          Chat on WhatsApp
-        </Button>
-      </div>
     </div>
   );
 }

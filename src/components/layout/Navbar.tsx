@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Search, Heart, MessageCircle } from "lucide-react";
 import { getWhatsAppLink } from "../../lib/whatsapp";
 import SearchOverlay from "./SearchOverlay";
@@ -15,12 +16,37 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // A mobile drawer should never follow the user down the page or trap them
+  // behind an open overlay after navigation/keyboard dismissal.
+  useEffect(() => {
+    setDrawerOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDrawerOpen(false);
+    };
+    const closeOnScroll = () => setDrawerOpen(false);
+    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("scroll", closeOnScroll, { passive: true });
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("scroll", closeOnScroll);
+    };
+  }, [drawerOpen]);
 
   return (
     <header
@@ -29,21 +55,28 @@ export default function Navbar() {
       }`}
     >
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-20">
-        <a href="/" className="flex flex-col leading-none">
+        <Link to="/" className="flex flex-row items-center gap-2.5 leading-none">
+          <img
+            src="/gk-design-logo.jpeg"
+            alt="GK Design logo"
+            className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-gold-deep/30"
+            width={36}
+            height={36}
+          />
           <span className="font-display text-2xl tracking-wide text-ink">
-            GK <span className="text-gold-deep">DESIGN</span>
+            GK DESIGN
           </span>
-        </a>
+        </Link>
 
         <ul className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <li key={link.href}>
-              <a
-                href={link.href}
+              <Link
+                to={link.href}
                 className="text-sm font-medium text-ink hover:text-gold-deep transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -52,14 +85,14 @@ export default function Navbar() {
           <button aria-label="Search products" onClick={() => setSearchOpen(true)} className="text-ink hover:text-gold-deep transition-colors">
             <Search size={19} />
           </button>
-          <a href="/wishlist" aria-label="View wishlist" className="text-ink hover:text-gold-deep transition-colors">
+          <Link to="/wishlist" aria-label="View wishlist" className="text-ink hover:text-gold-deep transition-colors">
             <Heart size={19} />
-          </a>
+          </Link>
           <a
             href={getWhatsAppLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-ink text-ivory text-xs font-medium uppercase tracking-wide px-4 py-2.5 rounded-gk-sm hover:bg-gold-deep hover:text-ink transition-colors"
+            className="flex items-center gap-2 bg-[#25D366] text-white text-xs font-medium uppercase tracking-wide px-4 py-2.5 rounded-gk-sm hover:bg-[#128C7E] transition-colors"
           >
             <MessageCircle size={15} /> Enquire
           </a>
@@ -82,35 +115,36 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       <div
-        className={`md:hidden fixed inset-0 top-20 bg-ivory z-40 transition-transform duration-300 ${
-          drawerOpen ? "translate-x-0" : "translate-x-full"
+        aria-hidden={!drawerOpen}
+        className={`md:hidden fixed inset-x-0 top-20 bottom-0 bg-ivory z-40 overflow-y-auto overscroll-contain transition-[transform,visibility] duration-300 ${
+          drawerOpen ? "translate-x-0 visible" : "translate-x-full invisible"
         }`}
       >
         <ul className="flex flex-col gap-6 px-6 py-10">
           {navLinks.map((link) => (
             <li key={link.href}>
-              <a
-                href={link.href}
+              <Link
+                to={link.href}
                 onClick={() => setDrawerOpen(false)}
                 className="font-display text-2xl text-ink"
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
           <li>
-            <a
-              href="/wishlist"
+            <Link
+              to="/wishlist"
               onClick={() => setDrawerOpen(false)}
               className="flex items-center gap-2 font-display text-2xl text-ink"
             >
               <Heart size={20} /> Wishlist
-            </a>
+            </Link>
           </li>
           <li className="pt-4">
             <a
               href={getWhatsAppLink()}
-              className="inline-flex items-center gap-2 bg-ink text-ivory text-sm font-medium uppercase tracking-wide px-5 py-3 rounded-gk-sm"
+              className="inline-flex items-center gap-2 bg-[#25D366] text-white text-sm font-medium uppercase tracking-wide px-5 py-3 rounded-gk-sm hover:bg-[#128C7E] transition-colors"
             >
               <MessageCircle size={16} /> Enquire on WhatsApp
             </a>

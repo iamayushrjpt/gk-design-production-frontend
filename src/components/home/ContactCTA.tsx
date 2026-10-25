@@ -20,7 +20,7 @@ export default function ContactCTA() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-          <Button variant="primary" as="a" href={getWhatsAppLink()} icon={<MessageCircle size={16} />}>
+          <Button variant="primary" as="a" href={getWhatsAppLink()} icon={<MessageCircle size={16} />} className="!bg-[#25D366] !text-white hover:!bg-[#128C7E]">
             {content.whatsappLabel || "Chat on WhatsApp"}
           </Button>
           <Button variant="outline-light" as="a" href={`tel:+${settings.whatsappNumber}`} icon={<Phone size={16} />}>

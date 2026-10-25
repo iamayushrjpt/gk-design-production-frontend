@@ -347,7 +347,7 @@ export const testimonials = [
 
 export const stats = [
   { value: 12, suffix: "+", label: "Years designing furniture" },
-  { value: 4200, suffix: "+", label: "Pieces delivered" },
+  { value: 200, suffix: "+", label: "Pieces delivered" },
   { value: 30, suffix: "+", label: "Cities served" },
   { value: 4.8, suffix: "/5", label: "Average customer rating" },
 ];

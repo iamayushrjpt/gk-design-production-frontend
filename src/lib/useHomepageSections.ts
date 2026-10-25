@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { api, USE_LIVE_API, type HomepageSection } from "./api";
+import { USE_LIVE_API, type HomepageSection } from "./api";
+import { getPublicHomepageSections } from "./publicHomepageCache";
 
 // Matches admin/lib/adminData.ts's mock section list — used as the default
 // order in demo mode, and as a fallback if a live fetch fails.
@@ -29,8 +30,7 @@ export function useHomepageSections() {
   useEffect(() => {
     if (!USE_LIVE_API) return;
     setLoading(true);
-    api.homepageSections
-      .list()
+    getPublicHomepageSections()
       .then((data) => {
         if (!Array.isArray(data) || data.length === 0) {
           // Empty collection (nothing seeded yet) or every section

@@ -183,7 +183,7 @@ export default function ProductDetail() {
           {/* CTAs */}
           <div className="flex flex-wrap gap-3 pt-2">
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              <Button variant="primary" icon={<MessageCircle size={16} />}>
+              <Button variant="primary" icon={<MessageCircle size={16} />} className="!bg-[#25D366] !text-white hover:!bg-[#128C7E]">
                 Book on WhatsApp
               </Button>
             </a>
