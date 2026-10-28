@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Pencil, Copy, Archive, EyeOff, Trash2, X } from "lucide-react";
-import { allProducts, categories as mockCategories, type Product, type Category } from "../../lib/data";
+import { Plus, Pencil, Copy, Archive, EyeOff, Trash2, X, Upload, Loader2 } from "lucide-react";
+import { allProducts, categories as mockCategories, type Product } from "../../lib/data";
 import { api, USE_LIVE_API, ApiError } from "../../lib/api";
 import AdminPageHeader from "../components/AdminPageHeader";
 import StatusBadge from "../components/StatusBadge";
@@ -26,24 +26,13 @@ export default function ProductsAdmin() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [editing, setEditing] = useState<AdminProduct | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [categoryOptions, setCategoryOptions] = useState<string[]>(USE_LIVE_API ? [] : []);
-  const [categoriesLoading, setCategoriesLoading] = useState(USE_LIVE_API);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(USE_LIVE_API ? [] : mockCategories.map((c) => c.name));
 
   useEffect(() => {
-    if (!USE_LIVE_API) {
-      setCategoryOptions(mockCategories.map((c) => c.name));
-      return;
-    }
-    let cancelled = false;
+    if (!USE_LIVE_API) return;
     api.admin.categories.list()
-      .then((items) => {
-        if (!cancelled) setCategoryOptions(items.filter((c) => !(c as Category & { isHidden?: boolean }).isHidden).map((c) => c.name));
-      })
-      .catch((e) => {
-        if (!cancelled) setLoadError(e instanceof ApiError ? e.message : "Could not load categories.");
-      })
-      .finally(() => { if (!cancelled) setCategoriesLoading(false); });
-    return () => { cancelled = true; };
+      .then((items) => setCategoryOptions(items.map((c) => c.name)))
+      .catch(() => setCategoryOptions([]));
   }, []);
 
   useEffect(() => {
@@ -151,7 +140,7 @@ export default function ProductsAdmin() {
             : `${products.length} total products · demo mode (mock data)`
         }
         action={
-          <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowAddForm(true)} disabled={categoriesLoading || categoryOptions.length === 0}>
+          <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowAddForm(true)}>
             Add Product
           </Button>
         }
@@ -306,12 +295,39 @@ function ProductFormModal({
     }
   );
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [sizesText, setSizesText] = useState((product?.sizes ?? ["Standard"]).join(", "));
 
-  useEffect(() => {
-    if (!product && !form.category && categoryOptions.length > 0) {
-      setForm((current) => ({ ...current, category: categoryOptions[0] }));
+  const uploadProductImages = async () => {
+    if (selectedImages.length === 0) return;
+    setImageError(null);
+    setUploadingImages(true);
+    const uploadedUrls: string[] = [];
+    try {
+      for (let i = 0; i < selectedImages.length; i += 1) {
+        const file = selectedImages[i];
+        setUploadProgress(`Uploading ${i + 1} of ${selectedImages.length}: ${file.name}`);
+        if (USE_LIVE_API) {
+          // The upload endpoint stores the file in R2 and creates a MediaAsset,
+          // so it also appears in the Media Library without a second request.
+          const asset = await api.admin.media.upload(file, "products");
+          uploadedUrls.push(asset.url);
+        } else {
+          uploadedUrls.push(URL.createObjectURL(file));
+        }
+      }
+      setForm((current) => ({ ...current, images: [...current.images, ...uploadedUrls] }));
+      setSelectedImages([]);
+      setUploadProgress("");
+    } catch (e) {
+      setImageError(e instanceof ApiError ? e.message : "One or more images could not be uploaded. Please try again.");
+    } finally {
+      setUploadingImages(false);
     }
-  }, [categoryOptions, form.category, product]);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-ink/50 flex items-center justify-center p-4">
@@ -325,7 +341,8 @@ function ProductFormModal({
           className="grid grid-cols-1 sm:grid-cols-2 gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            onSave(form);
+            if (uploadingImages) return;
+            onSave({ ...form, sizes: sizesText.split(",").map((size) => size.trim()).filter(Boolean) });
           }}
         >
           <label className="flex flex-col gap-1 text-sm sm:col-span-2">
@@ -350,6 +367,22 @@ function ProductFormModal({
             Material
             <input value={form.material} onChange={(e) => setForm({ ...form, material: e.target.value })} className="px-3 py-2 border border-stone-200 rounded-gk-sm text-sm" />
           </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Available Sizes
+            <input value={sizesText} onChange={(e) => setSizesText(e.target.value)} placeholder="e.g. Small, Medium, Large" className="px-3 py-2 border border-stone-200 rounded-gk-sm text-sm" />
+            <span className="text-xs text-stone">Separate sizes with commas.</span>
+          </label>
+          <div className="flex flex-col gap-2 text-sm sm:col-span-2">
+            <span>Available Colors</span>
+            {form.colors.map((color, index) => (
+              <div key={`${index}-${color.name}`} className="grid grid-cols-[1fr_110px_auto] gap-2 items-center">
+                <input aria-label={`Color ${index + 1} name`} value={color.name} onChange={(e) => setForm({ ...form, colors: form.colors.map((item, i) => i === index ? { ...item, name: e.target.value } : item) })} placeholder="Color name" className="min-w-0 px-3 py-2 border border-stone-200 rounded-gk-sm text-sm" />
+                <input aria-label={`Color ${index + 1} hex`} value={color.hex} onChange={(e) => setForm({ ...form, colors: form.colors.map((item, i) => i === index ? { ...item, hex: e.target.value } : item) })} placeholder="#A9773F" className="min-w-0 px-3 py-2 border border-stone-200 rounded-gk-sm text-sm" />
+                <button type="button" onClick={() => setForm({ ...form, colors: form.colors.filter((_, i) => i !== index) })} aria-label="Remove color" className="p-2 text-stone hover:text-rust"><X size={16} /></button>
+              </div>
+            ))}
+            <div><Button type="button" variant="outline-dark" onClick={() => setForm({ ...form, colors: [...form.colors, { name: "", hex: "#000000" }] })}>Add Color</Button></div>
+          </div>
           <label className="flex flex-col gap-1 text-sm sm:col-span-2">
             Description
             <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="px-3 py-2 border border-stone-200 rounded-gk-sm text-sm" />
@@ -374,6 +407,26 @@ function ProductFormModal({
                   </button>
                 </div>
               ))}
+            </div>
+            <div className="rounded-gk-sm border border-dashed border-stone-300 p-3 flex flex-col gap-3">
+              <label className="flex flex-col gap-1 text-sm">
+                Upload multiple images
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  disabled={uploadingImages}
+                  onChange={(e) => setSelectedImages(Array.from(e.target.files ?? []))}
+                  className="block w-full text-sm file:mr-3 file:rounded-gk-sm file:border-0 file:bg-ink file:px-3 file:py-2 file:text-ivory"
+                />
+              </label>
+              {selectedImages.length > 0 && <p className="text-xs text-stone">{selectedImages.length} image(s) selected: {selectedImages.map((file) => file.name).join(", ")}</p>}
+              {imageError && <p role="alert" className="text-xs text-rust">{imageError}</p>}
+              {uploadProgress && <p className="text-xs text-stone">{uploadProgress}</p>}
+              <div><Button type="button" variant="outline-dark" disabled={selectedImages.length === 0 || uploadingImages} onClick={uploadProductImages}>
+                {uploadingImages ? <><Loader2 size={14} className="animate-spin" /> Uploading…</> : <><Upload size={14} /> Upload and Add Images</>}
+              </Button></div>
+              <p className="text-xs text-stone">Uploads are saved to the Products folder in Media Library automatically. In demo mode, images are only previewed locally.</p>
             </div>
             <div className="flex gap-2">
               <input
@@ -410,7 +463,7 @@ function ProductFormModal({
 
           <div className="sm:col-span-2 flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline-dark" onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="primary">{product ? "Save Changes" : "Create Product"}</Button>
+            <Button type="submit" variant="primary" disabled={uploadingImages}>{product ? "Save Changes" : "Create Product"}</Button>
           </div>
         </form>
       </div>
