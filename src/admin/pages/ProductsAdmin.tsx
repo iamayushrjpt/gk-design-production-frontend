@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Pencil, Copy, Archive, EyeOff, Trash2, X } from "lucide-react";
-import { allProducts, categories, type Product } from "../../lib/data";
+import { allProducts, categories as mockCategories, type Product, type Category } from "../../lib/data";
 import { api, USE_LIVE_API, ApiError } from "../../lib/api";
 import AdminPageHeader from "../components/AdminPageHeader";
 import StatusBadge from "../components/StatusBadge";
@@ -26,6 +26,25 @@ export default function ProductsAdmin() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [editing, setEditing] = useState<AdminProduct | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(USE_LIVE_API ? [] : []);
+  const [categoriesLoading, setCategoriesLoading] = useState(USE_LIVE_API);
+
+  useEffect(() => {
+    if (!USE_LIVE_API) {
+      setCategoryOptions(mockCategories.map((c) => c.name));
+      return;
+    }
+    let cancelled = false;
+    api.admin.categories.list()
+      .then((items) => {
+        if (!cancelled) setCategoryOptions(items.filter((c) => !(c as Category & { isHidden?: boolean }).isHidden).map((c) => c.name));
+      })
+      .catch((e) => {
+        if (!cancelled) setLoadError(e instanceof ApiError ? e.message : "Could not load categories.");
+      })
+      .finally(() => { if (!cancelled) setCategoriesLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!USE_LIVE_API) return;
@@ -132,7 +151,7 @@ export default function ProductsAdmin() {
             : `${products.length} total products · demo mode (mock data)`
         }
         action={
-          <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowAddForm(true)}>
+          <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowAddForm(true)} disabled={categoriesLoading || categoryOptions.length === 0}>
             Add Product
           </Button>
         }
@@ -236,7 +255,7 @@ export default function ProductsAdmin() {
       {(editing || showAddForm) && (
         <ProductFormModal
           product={editing}
-          categoryOptions={categories.map((c) => c.name)}
+          categoryOptions={categoryOptions}
           onClose={() => {
             setEditing(null);
             setShowAddForm(false);
@@ -287,6 +306,12 @@ function ProductFormModal({
     }
   );
   const [newImageUrl, setNewImageUrl] = useState("");
+
+  useEffect(() => {
+    if (!product && !form.category && categoryOptions.length > 0) {
+      setForm((current) => ({ ...current, category: categoryOptions[0] }));
+    }
+  }, [categoryOptions, form.category, product]);
 
   return (
     <div className="fixed inset-0 z-50 bg-ink/50 flex items-center justify-center p-4">

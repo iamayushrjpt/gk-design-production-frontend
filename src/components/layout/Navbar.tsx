@@ -38,20 +38,17 @@ export default function Navbar() {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setDrawerOpen(false);
     };
-    const closeOnScroll = () => setDrawerOpen(false);
     window.addEventListener("keydown", closeOnEscape);
-    window.addEventListener("scroll", closeOnScroll, { passive: true });
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", closeOnEscape);
-      window.removeEventListener("scroll", closeOnScroll);
     };
   }, [drawerOpen]);
 
   return (
     <header
       className={`sticky top-0 z-50 transition-colors duration-300 ${
-        scrolled ? "bg-ivory/95 backdrop-blur shadow-gk-soft" : "bg-transparent"
+        scrolled ? `bg-ivory/95 ${drawerOpen ? "" : "backdrop-blur"} shadow-gk-soft` : "bg-transparent"
       }`}
     >
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 h-20">
