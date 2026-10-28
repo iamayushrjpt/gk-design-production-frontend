@@ -1,4 +1,4 @@
-import { categories } from "../../lib/data";
+import { useLiveCategories } from "../../lib/useLiveCategories";
 
 export type Filters = {
   category: string | null;
@@ -16,6 +16,8 @@ interface ProductFiltersProps {
 }
 
 export default function ProductFilters({ filters, onChange, resultCount }: ProductFiltersProps) {
+  const { categories } = useLiveCategories();
+
   return (
     <aside className="flex flex-col gap-8 w-full md:w-64 shrink-0">
       <div>
