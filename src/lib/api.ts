@@ -52,15 +52,24 @@ export function clearToken() {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers = new Headers(options.headers);
   const token = getToken();
+
+  // Content-Type is unnecessary on GET requests. Sending it on cross-origin
+  // GETs can trigger an avoidable CORS preflight request.
+  if (options.body != null && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  // Public endpoints do not need the admin JWT. Avoiding Authorization on
+  // public requests can also avoid a CORS preflight in the browser.
+  if (token && path.startsWith("/api/admin/")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers,
   });
 
   const body: ApiEnvelope<T> = await response.json().catch(() => ({

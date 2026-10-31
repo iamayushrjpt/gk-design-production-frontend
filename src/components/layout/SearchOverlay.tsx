@@ -17,7 +17,10 @@ export default function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; on
   }, [input]);
 
   const { products, loading } = useLiveProducts(
-    debouncedQuery.trim() ? (USE_LIVE_API ? { query: debouncedQuery, size: 6 } : {}) : {}
+    debouncedQuery.trim()
+      ? (USE_LIVE_API ? { query: debouncedQuery.trim(), size: 6 } : {})
+      : {},
+    Boolean(isOpen && debouncedQuery.trim())
   );
 
   // On mock data, filtering has to happen client-side since useLiveProducts
