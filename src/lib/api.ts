@@ -72,14 +72,27 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers,
   });
 
-  const body: ApiEnvelope<T> = await response.json().catch(() => ({
-    success: false,
-    message: "Server returned an invalid response.",
-    data: null as T,
-  }));
+  // Read as text first: DELETE endpoints may return 204/no body, and proxies or
+  // security filters may return plain-text/HTML errors instead of JSON.
+  const raw = await response.text();
+
+  if (response.status === 204 || (response.ok && !raw.trim())) {
+    return undefined as T;
+  }
+
+  let body: ApiEnvelope<T>;
+  try {
+    body = JSON.parse(raw) as ApiEnvelope<T>;
+  } catch {
+    const detail = raw.trim().replace(/\s+/g, " ").slice(0, 220);
+    const message = response.ok
+      ? `Server returned a non-JSON response (HTTP ${response.status}).`
+      : `Request failed (HTTP ${response.status} ${response.statusText}).${detail ? ` ${detail}` : ""}`;
+    throw new ApiError(message, response.status);
+  }
 
   if (!response.ok || !body.success) {
-    throw new ApiError(body.message ?? "Request failed.", response.status, body.errors ?? []);
+    throw new ApiError(body.message ?? `Request failed (HTTP ${response.status}).`, response.status, body.errors ?? []);
   }
 
   return body.data;

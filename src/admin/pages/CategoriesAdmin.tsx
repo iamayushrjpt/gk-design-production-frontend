@@ -65,20 +65,18 @@ export default function CategoriesAdmin() {
   const remove = async (slug: string) => {
     const category = categories.find((c) => c.slug === slug);
     if (!category || deletingSlug) return;
-
-    const confirmed = window.confirm(
-      `Delete category "${category.name}"? This will remove it from the public category list. Products already assigned to it will not be deleted.`
-    );
-    if (!confirmed) return;
+    if (!window.confirm(`Delete the category "${category.name}"?`)) return;
 
     setLoadError(null);
     setDeletingSlug(slug);
     try {
-      // Delete on the server first. Only update the UI after the API confirms success.
-      if (USE_LIVE_API) await api.admin.categories.remove(slug);
+      if (USE_LIVE_API) {
+        await api.admin.categories.remove(slug);
+      }
+      // Only remove it from the UI after the server confirms success.
       setCategories((prev) => prev.filter((c) => c.slug !== slug));
     } catch (e) {
-      setLoadError(e instanceof ApiError ? e.message : "Could not delete category. Check your admin login and try again.");
+      setLoadError(e instanceof ApiError ? e.message : "Could not delete category.");
     } finally {
       setDeletingSlug(null);
     }
@@ -148,7 +146,7 @@ export default function CategoriesAdmin() {
                 <ArrowDown size={14} />
               </button>
             </div>
-            <img src={cat.image} alt="" className="w-12 h-12 rounded-gk-sm object-cover" />
+            <img src={cat.image} alt={cat.name} className="w-12 h-12 rounded-gk-sm bg-stone-50 object-contain p-1" />
             <div className="flex-1 min-w-0">
               <p className="text-sm text-ink">{cat.name}</p>
               <p className="text-xs text-stone">{cat.count} products · /{cat.slug}</p>
@@ -161,13 +159,7 @@ export default function CategoriesAdmin() {
               <button onClick={() => setEditing(cat)} aria-label="Edit category" className="text-stone hover:text-gold-deep">
                 <Pencil size={16} />
               </button>
-              <button
-                onClick={() => remove(cat.slug)}
-                aria-label="Delete category"
-                title={deletingSlug === cat.slug ? "Deleting…" : "Delete category"}
-                disabled={deletingSlug !== null}
-                className="text-stone hover:text-rust disabled:opacity-40 disabled:cursor-not-allowed"
-              >
+              <button onClick={() => remove(cat.slug)} disabled={deletingSlug === cat.slug || deletingSlug !== null} aria-label="Delete category" title={deletingSlug === cat.slug ? "Deleting…" : "Delete category"} className="text-stone hover:text-rust disabled:opacity-40">
                 <Trash2 size={16} />
               </button>
             </div>
