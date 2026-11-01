@@ -227,11 +227,32 @@ export const api = {
 
     categories: {
       list: () => request<Category[]>("/api/admin/categories"),
-      create: (payload: Partial<Category> & { isHidden?: boolean; order?: number }) =>
-        request<Category>("/api/admin/categories", { method: "POST", body: JSON.stringify(payload) }),
-      update: (slug: string, payload: Partial<Category> & { isHidden?: boolean; order?: number }) =>
-        request<Category>(`/api/admin/categories/${slug}`, { method: "PUT", body: JSON.stringify(payload) }),
-      remove: (slug: string) => request<void>(`/api/admin/categories/${slug}`, { method: "DELETE" }),
+
+      create: (payload: Partial<Category> & {
+        isHidden?: boolean;
+        order?: number;
+      }) =>
+        request<Category>("/api/admin/categories", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        }),
+
+      update: (
+        slug: string,
+        payload: Partial<Category> & {
+          isHidden?: boolean;
+          order?: number;
+        }
+      ) =>
+        request<Category>(`/api/admin/categories/${encodeURIComponent(slug)}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        }),
+
+      remove: (id: string) =>
+        request<void>(`/api/admin/categories/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        }),
     },
 
     homepageSections: {
