@@ -7,7 +7,7 @@ import StatusBadge from "../components/StatusBadge";
 import Button from "../../components/ui/Button";
 
 type Status = "Published" | "Draft" | "Hidden" | "Hold" | "Archived";
-type AdminProduct = Product & { status: Status };
+type AdminProduct = Product & { status: Status; createdAt?: string };
 
 const STATUS_OPTIONS: Status[] = ["Published", "Draft", "Hidden", "Hold", "Archived"];
 
@@ -24,6 +24,9 @@ export default function ProductsAdmin() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [editing, setEditing] = useState<AdminProduct | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<string[]>(USE_LIVE_API ? [] : mockCategories.map((c) => c.name));
@@ -37,14 +40,34 @@ export default function ProductsAdmin() {
 
   useEffect(() => {
     if (!USE_LIVE_API) return;
-    setLoading(true);
-    api.admin.products
-      .list()
-      .then((res) =>
-        setProducts(res.items.map((p) => ({ ...p, status: fromBackendStatus(p.status) }) as AdminProduct))
-      )
-      .catch((e) => setLoadError(e instanceof ApiError ? e.message : "Could not load products."))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    const loadAllProducts = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        // The backend defaults to 20 records per page. Fetch every page so the
+        // admin inventory is not silently limited to the first 20 products.
+        const allItems: AdminProduct[] = [];
+        let page = 0;
+        let hasNext = true;
+        while (hasNext) {
+          const result = await api.admin.products.list({ page, size: 100 });
+          allItems.push(...result.items.map((p) => ({
+            ...p,
+            status: fromBackendStatus(p.status),
+          }) as AdminProduct));
+          hasNext = result.hasNext;
+          page += 1;
+        }
+        if (!cancelled) setProducts(allItems);
+      } catch (e) {
+        if (!cancelled) setLoadError(e instanceof ApiError ? e.message : "Could not load products.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void loadAllProducts();
+    return () => { cancelled = true; };
   }, []);
 
   const filtered = useMemo(() => {
@@ -52,9 +75,15 @@ export default function ProductsAdmin() {
     return products.filter((p) => {
       const matchesQuery = !q || `${p.name} ${p.sku} ${p.category}`.toLowerCase().includes(q);
       const matchesStatus = statusFilter === "all" || p.status === statusFilter;
-      return matchesQuery && matchesStatus;
+      const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
+      // Product.createdAt is supplied by the backend. Compare YYYY-MM-DD
+      // strings to avoid timezone shifts from date-only filter values.
+      const createdDate = p.createdAt ? p.createdAt.slice(0, 10) : "";
+      const matchesDateFrom = !dateFrom || (createdDate !== "" && createdDate >= dateFrom);
+      const matchesDateTo = !dateTo || (createdDate !== "" && createdDate <= dateTo);
+      return matchesQuery && matchesStatus && matchesCategory && matchesDateFrom && matchesDateTo;
     });
-  }, [products, query, statusFilter]);
+  }, [products, query, statusFilter, categoryFilter, dateFrom, dateTo]);
 
   const updateStatus = async (slug: string, status: Status) => {
     setProducts((prev) => prev.map((p) => (p.slug === slug ? { ...p, status } : p)));
@@ -150,14 +179,24 @@ export default function ProductsAdmin() {
         <div className="mb-6 px-4 py-3 rounded-gk-sm bg-rust/10 text-rust text-sm">{loadError}</div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 mb-6">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name, SKU, category…"
-          className="flex-1 px-4 py-2.5 rounded-gk-sm border border-stone-200 bg-paper text-sm focus-visible:outline-gold"
+          placeholder="Search by name, SKU…"
+          className="xl:col-span-2 px-4 py-2.5 rounded-gk-sm border border-stone-200 bg-paper text-sm focus-visible:outline-gold"
         />
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="px-4 py-2.5 rounded-gk-sm border border-stone-200 bg-paper text-sm"
+        >
+          <option value="all">All Categories</option>
+          {[...new Set([...categoryOptions, ...products.map((p) => p.category)].filter(Boolean))].sort().map((category) => (
+            <option key={category} value={category}>{category}</option>
+          ))}
+        </select>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -168,6 +207,14 @@ export default function ProductsAdmin() {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
+        <div className="flex gap-2">
+          <input aria-label="Created from date" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="min-w-0 w-full px-2 py-2.5 rounded-gk-sm border border-stone-200 bg-paper text-xs" />
+          <input aria-label="Created to date" type="date" value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} className="min-w-0 w-full px-2 py-2.5 rounded-gk-sm border border-stone-200 bg-paper text-xs" />
+        </div>
+        <div className="xl:col-span-5 flex items-center justify-between text-xs text-stone">
+          <span>Showing {filtered.length} of {products.length} products</span>
+          <button type="button" onClick={() => { setQuery(""); setStatusFilter("all"); setCategoryFilter("all"); setDateFrom(""); setDateTo(""); }} className="underline hover:text-ink">Clear filters</button>
+        </div>
       </div>
 
       <div className="bg-paper rounded-gk-lg shadow-gk-soft overflow-x-auto">
@@ -181,6 +228,7 @@ export default function ProductsAdmin() {
               <th className="px-5 py-3 font-medium">Category</th>
               <th className="px-5 py-3 font-medium">Price</th>
               <th className="px-5 py-3 font-medium">Status</th>
+              <th className="px-5 py-3 font-medium">Created</th>
               <th className="px-5 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
@@ -210,6 +258,9 @@ export default function ProductsAdmin() {
                   </select>
                   <div className="mt-1"><StatusBadge status={p.status} /></div>
                 </td>
+                <td className="px-5 py-3 text-xs text-stone whitespace-nowrap">
+                  {p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-2">
                     <button onClick={() => setEditing(p)} aria-label="Edit product" className="text-stone hover:text-gold-deep">
@@ -233,7 +284,7 @@ export default function ProductsAdmin() {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center py-10 text-stone text-sm">No products match your search.</td>
+                <td colSpan={6} className="text-center py-10 text-stone text-sm">No products match your search.</td>
               </tr>
             )}
           </tbody>
