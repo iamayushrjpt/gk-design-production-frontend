@@ -9,11 +9,11 @@ export default function ImageGallery({ images, alt }: { images: string[]; alt: s
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-square rounded-gk-lg overflow-hidden bg-stone-200 group">
+      <div className="relative aspect-square rounded-gk-lg overflow-hidden bg-stone-100 group">
         <img
           src={images[activeIndex]}
           alt={`${alt} — view ${activeIndex + 1}`}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-full object-contain p-3"
         />
         <button
           onClick={() => setFullscreen(true)}
@@ -55,7 +55,7 @@ export default function ImageGallery({ images, alt }: { images: string[]; alt: s
                 i === activeIndex ? "border-gold-deep" : "border-transparent"
               }`}
             >
-              <img src={img} alt="" className="w-full h-full object-cover" />
+              <img src={img} alt="" className="w-full h-full object-contain bg-stone-100 p-1" />
             </button>
           ))}
         </div>

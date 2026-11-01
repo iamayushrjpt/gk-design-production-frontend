@@ -15,6 +15,7 @@ export default function CategoriesAdmin() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminCategory | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (!USE_LIVE_API) return;
@@ -62,13 +63,24 @@ export default function CategoriesAdmin() {
   };
 
   const remove = async (slug: string) => {
-    setCategories((prev) => prev.filter((c) => c.slug !== slug));
-    if (USE_LIVE_API) {
-      try {
-        await api.admin.categories.remove(slug);
-      } catch (e) {
-        setLoadError(e instanceof ApiError ? e.message : "Could not delete category.");
-      }
+    const category = categories.find((c) => c.slug === slug);
+    if (!category || deletingSlug) return;
+
+    const confirmed = window.confirm(
+      `Delete category "${category.name}"? This will remove it from the public category list. Products already assigned to it will not be deleted.`
+    );
+    if (!confirmed) return;
+
+    setLoadError(null);
+    setDeletingSlug(slug);
+    try {
+      // Delete on the server first. Only update the UI after the API confirms success.
+      if (USE_LIVE_API) await api.admin.categories.remove(slug);
+      setCategories((prev) => prev.filter((c) => c.slug !== slug));
+    } catch (e) {
+      setLoadError(e instanceof ApiError ? e.message : "Could not delete category. Check your admin login and try again.");
+    } finally {
+      setDeletingSlug(null);
     }
   };
 
@@ -149,7 +161,13 @@ export default function CategoriesAdmin() {
               <button onClick={() => setEditing(cat)} aria-label="Edit category" className="text-stone hover:text-gold-deep">
                 <Pencil size={16} />
               </button>
-              <button onClick={() => remove(cat.slug)} aria-label="Delete category" className="text-stone hover:text-rust">
+              <button
+                onClick={() => remove(cat.slug)}
+                aria-label="Delete category"
+                title={deletingSlug === cat.slug ? "Deleting…" : "Delete category"}
+                disabled={deletingSlug !== null}
+                className="text-stone hover:text-rust disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 <Trash2 size={16} />
               </button>
             </div>

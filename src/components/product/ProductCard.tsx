@@ -17,14 +17,14 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group relative flex flex-col bg-paper rounded-gk-lg overflow-hidden shadow-gk-soft hover:shadow-gk-lift transition-shadow duration-300">
       {/* Image — the whole thing is now a real link to the product page */}
-      <Link to={`/products/${product.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-stone-200">
+      <Link to={`/products/${product.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-stone-100">
         <img
           src={product.images[0]}
           alt={product.name}
           loading="lazy"
           decoding="async"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]"
         />
 
         {product.isLuxury && (
