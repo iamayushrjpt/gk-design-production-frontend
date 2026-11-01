@@ -3,6 +3,8 @@
 // for live API calls later requires no component changes.
 
 export type Category = {
+  /** MongoDB document ID returned by the live backend; absent in mock data. */
+  id?: string;
   slug: string;
   name: string;
   image: string;

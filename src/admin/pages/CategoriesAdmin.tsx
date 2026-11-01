@@ -15,7 +15,7 @@ export default function CategoriesAdmin() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminCategory | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!USE_LIVE_API) return;
@@ -62,23 +62,27 @@ export default function CategoriesAdmin() {
     }
   };
 
-  const remove = async (slug: string) => {
-    const category = categories.find((c) => c.slug === slug);
-    if (!category || deletingSlug) return;
+  const remove = async (category: AdminCategory) => {
+    if (deletingId) return;
     if (!window.confirm(`Delete the category "${category.name}"?`)) return;
 
     setLoadError(null);
-    setDeletingSlug(slug);
+    const deletionKey = category.id ?? category.slug;
+    if (USE_LIVE_API && !category.id) {
+      setLoadError("Cannot delete this category because the API response did not include its MongoDB ID. Reload the page and try again.");
+      return;
+    }
+    setDeletingId(deletionKey);
     try {
       if (USE_LIVE_API) {
-        await api.admin.categories.remove(slug);
+        await api.admin.categories.remove(category.id!);
       }
       // Only remove it from the UI after the server confirms success.
-      setCategories((prev) => prev.filter((c) => c.slug !== slug));
+      setCategories((prev) => prev.filter((c) => category.id ? c.id !== category.id : c.slug !== category.slug));
     } catch (e) {
       setLoadError(e instanceof ApiError ? e.message : "Could not delete category.");
     } finally {
-      setDeletingSlug(null);
+      setDeletingId(null);
     }
   };
 
@@ -137,7 +141,7 @@ export default function CategoriesAdmin() {
       ) : (
       <div className="bg-paper rounded-gk-lg shadow-gk-soft divide-y divide-stone-200">
         {categories.map((cat, i) => (
-          <div key={cat.slug} className="flex items-center gap-4 px-5 py-4">
+          <div key={cat.id ?? `${cat.slug}-${i}`} className="flex items-center gap-4 px-5 py-4">
             <div className="flex flex-col">
               <button onClick={() => move(i, -1)} aria-label="Move up" disabled={i === 0} className="text-stone hover:text-gold-deep disabled:opacity-30">
                 <ArrowUp size={14} />
@@ -159,7 +163,7 @@ export default function CategoriesAdmin() {
               <button onClick={() => setEditing(cat)} aria-label="Edit category" className="text-stone hover:text-gold-deep">
                 <Pencil size={16} />
               </button>
-              <button onClick={() => remove(cat.slug)} disabled={deletingSlug === cat.slug || deletingSlug !== null} aria-label="Delete category" title={deletingSlug === cat.slug ? "Deleting…" : "Delete category"} className="text-stone hover:text-rust disabled:opacity-40">
+              <button onClick={() => remove(cat)} disabled={deletingId === (cat.id ?? cat.slug) || deletingId !== null} aria-label="Delete category" title={deletingId === (cat.id ?? cat.slug) ? "Deleting…" : "Delete category"} className="text-stone hover:text-rust disabled:opacity-40">
                 <Trash2 size={16} />
               </button>
             </div>
