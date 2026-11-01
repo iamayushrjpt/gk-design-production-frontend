@@ -249,8 +249,8 @@ export const api = {
           body: JSON.stringify(payload),
         }),
 
-      remove: (id: string) =>
-        request<void>(`/api/admin/categories/${encodeURIComponent(id)}`, {
+      remove: (slug: string) =>
+        request<void>(`/api/admin/categories/${encodeURIComponent(slug)}`, {
           method: "DELETE",
         }),
     },
