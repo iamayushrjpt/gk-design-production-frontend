@@ -18,14 +18,18 @@ export default function ProductCard({ product }: { product: Product }) {
     <div className="group relative flex flex-col bg-paper rounded-gk-lg overflow-hidden shadow-gk-soft hover:shadow-gk-lift transition-shadow duration-300">
       {/* Image — the whole thing is now a real link to the product page */}
       <Link to={`/products/${product.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-stone-100">
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          loading="lazy"
-          decoding="async"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.02]"
-        />
+
+      <img
+        src={product.images[0]}
+        alt={product.name}
+        loading="lazy"
+        decoding="async"
+        width="600"
+        height="750"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        className="w-full h-full object-cover p-2 transition-transform duration-300 group-hover:scale-[1.02]"
+      />
+
 
         {product.isLuxury && (
           <span className="absolute top-3 left-3 bg-ink/85 text-gold text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-full">
