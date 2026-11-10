@@ -13,7 +13,8 @@ export default function CategoryDetail() {
   const category = categories.find((c) => c.slug === slug);
 
   const { products: source, loading: productsLoading } = useLiveProducts(
-    USE_LIVE_API ? { category: category?.name, size: 60 } : {}
+    USE_LIVE_API ? { category: category?.name, size: 60 } : {},
+    !USE_LIVE_API || Boolean(category)
   );
 
   const products = useMemo(

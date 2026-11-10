@@ -27,7 +27,7 @@ export default function Products() {
   const [filters, setFilters] = useState<Filters>({
     category: null,
     tier: initialTier,
-    maxPrice: 60000,
+    maxPrice: 1000000,
     inStockOnly: false,
   });
 
@@ -38,7 +38,7 @@ export default function Products() {
       ? {
           query: query || undefined,
           category: filters.category ?? undefined,
-          maxPrice: filters.maxPrice,
+          maxPrice: filters.maxPrice >= 1000000 ? undefined : filters.maxPrice,
           luxuryOnly: filters.tier === "luxury" ? true : undefined,
           affordableOnly: filters.tier === "affordable" ? true : undefined,
           inStockOnly: filters.inStockOnly || undefined,
@@ -65,7 +65,7 @@ export default function Products() {
       const matchesCategory = !filters.category || p.category === filters.category;
       const matchesTier =
         filters.tier === "all" || (filters.tier === "luxury" ? p.isLuxury : !p.isLuxury);
-      const matchesPrice = p.price <= filters.maxPrice;
+      const matchesPrice = filters.maxPrice >= 1000000 || p.price <= filters.maxPrice;
       const matchesStock = !filters.inStockOnly || p.stockStatus === "In Stock";
 
       return matchesQuery && matchesCategory && matchesTier && matchesPrice && matchesStock;

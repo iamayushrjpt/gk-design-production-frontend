@@ -7,7 +7,7 @@ export type Filters = {
   inStockOnly: boolean;
 };
 
-const PRICE_CEILING = 60000;
+const PRICE_CEILING = 1000000;
 
 interface ProductFiltersProps {
   filters: Filters;
