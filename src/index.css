@@ -88,3 +88,27 @@ body {
   outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
+
+/* Remove orange/gold focus border from search controls only */
+#gk-search-dropdown .gk-search-input,
+#gk-search-dropdown .gk-search-input:focus,
+#gk-search-dropdown .gk-search-input:focus-visible,
+#gk-search-dropdown .gk-search-control,
+#gk-search-dropdown .gk-search-control:focus,
+#gk-search-dropdown .gk-search-control:focus-visible,
+.gk-search-trigger:focus,
+.gk-search-trigger:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#gk-search-dropdown .gk-search-input {
+  border: 0 !important;
+  appearance: none;
+}
+
+#gk-search-dropdown .gk-search-input::-webkit-search-cancel-button,
+#gk-search-dropdown .gk-search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}

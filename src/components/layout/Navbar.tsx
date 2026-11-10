@@ -79,7 +79,7 @@ export default function Navbar() {
         </ul>
 
         <div className="hidden md:flex items-center gap-5">
-          <button aria-label="Search products" onClick={() => setSearchOpen(true)} className="text-ink hover:text-gold-deep transition-colors">
+          <button aria-label="Search products" onClick={() => setSearchOpen(true)} className="gk-search-trigger text-ink hover:text-gold-deep transition-colors">
             <Search size={19} />
           </button>
           <Link to="/wishlist" aria-label="View wishlist" className="text-ink hover:text-gold-deep transition-colors">
@@ -96,7 +96,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4 md:hidden">
-          <button aria-label="Search products" onClick={() => setSearchOpen(true)} className="text-ink">
+          <button aria-label="Search products" onClick={() => setSearchOpen(true)} className="gk-search-trigger text-ink">
             <Search size={21} />
           </button>
           <button
